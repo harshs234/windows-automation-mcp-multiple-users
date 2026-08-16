@@ -1,0 +1,19 @@
+{
+  "endpoints": [
+    {
+      "endpoint_id": "endpoint-001",
+      "url": null,
+      "api_key_env": "ENDPOINT_001_API_KEY"
+    },
+    {
+      "endpoint_id": "endpoint-002",
+      "url": "http://127.0.0.1:8501",
+      "api_key_env": "ENDPOINT_002_API_KEY"
+    },
+    {
+      "endpoint_id": "endpoint-003",
+      "url": "http://192.168.1.5:8501",
+      "api_key_env": "ENDPOINT_003_API_KEY"
+    }
+  ]
+}

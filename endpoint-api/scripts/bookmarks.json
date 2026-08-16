@@ -1,0 +1,24 @@
+{
+  "bookmarks": [
+    {
+      "name": "Youtube",
+      "url": "https://www.youtube.com"
+    },
+    {
+      "name": "Google",
+      "url": "https://www.google.com"
+    },
+    {
+      "name": "Amazon",
+      "url": "https://www.amazon.com"
+    },
+    {
+      "name": "Wikipedia",
+      "url": "https://www.wikipedia.org"
+    },
+    {
+      "name": "Stack Overflow",
+      "url": "https://stackoverflow.com"
+    }
+  ]
+}

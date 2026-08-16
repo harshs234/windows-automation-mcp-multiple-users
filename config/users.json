@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "user_id": "harsh",
+      "endpoint_id": "endpoint-001",
+      "computer_name": "NOIAAA5CD201K1T",
+      "enabled": true
+    },
+    {
+      "user_id": "test_user_01",
+      "endpoint_id": "endpoint-002",
+      "computer_name": "TEST-PC-01",
+      "enabled": true
+    },
+    {
+      "user_id": "test_user_02",
+      "endpoint_id": "endpoint-003",
+      "computer_name": "TEST-PC-02",
+      "enabled": true
+    }
+  ]
+}

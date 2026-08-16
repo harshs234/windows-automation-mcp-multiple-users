@@ -157,14 +157,56 @@ function Backup-BookmarksFile {
 function Update-BrowserBookmarksFile {
     param([string]$BookmarksFilePath, [string]$ProfileLabel)
 
-    if (-not (Test-Path $BookmarksFilePath)) { return $null }
+    if (-not (Test-Path $BookmarksFilePath)) {
+        # Fresh Chromium profile: initialize a minimal valid Bookmarks file.
+        $ts = Get-ChromeTimestamp
 
-    $raw = Get-Content -Path $BookmarksFilePath -Raw -Encoding UTF8
-    try {
-        $json = $raw | ConvertFrom-Json
-    } catch {
-        Write-Warning "Could not parse Bookmarks file for $ProfileLabel - skipping ($_)"
-        return $null
+        $json = [PSCustomObject]@{
+            checksum = ""
+            roots = [PSCustomObject]@{
+                bookmark_bar = [PSCustomObject]@{
+                    children      = @()
+                    date_added    = "$ts"
+                    date_modified = "$ts"
+                    guid          = (New-BookmarkGuid)
+                    id            = "1"
+                    name          = "Bookmarks bar"
+                    type          = "folder"
+                }
+                other = [PSCustomObject]@{
+                    children      = @()
+                    date_added    = "$ts"
+                    date_modified = "$ts"
+                    guid          = (New-BookmarkGuid)
+                    id            = "2"
+                    name          = "Other bookmarks"
+                    type          = "folder"
+                }
+                synced = [PSCustomObject]@{
+                    children      = @()
+                    date_added    = "$ts"
+                    date_modified = "$ts"
+                    guid          = (New-BookmarkGuid)
+                    id            = "3"
+                    name          = "Mobile bookmarks"
+                    type          = "folder"
+                }
+            }
+            version = 1
+        }
+
+        Write-Host "Creating new Bookmarks file for $ProfileLabel"
+    }
+    else {
+        $raw = Get-Content -Path $BookmarksFilePath -Raw -Encoding UTF8
+
+        try {
+            $json = $raw | ConvertFrom-Json
+        }
+        catch {
+            Write-Warning "Could not parse Bookmarks file for $ProfileLabel - skipping ($_)"
+            return $null
+        }
     }
 
     # Find highest existing id across the whole file so new ids stay unique

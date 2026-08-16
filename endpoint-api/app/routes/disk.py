@@ -16,6 +16,11 @@ router = APIRouter()
 def get_disk_status(_: str = Depends(verify_api_key)):
     result = run_json_script("disk-check-api.ps1")
 
+    # PowerShell returns a dictionary when only one drive exists,
+    # and a list when multiple drives exist.
+    if isinstance(result, dict):
+        result = [result]
+
     return [
         DiskStatusResponse(
             drive=drive["Drive"],

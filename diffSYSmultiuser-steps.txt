@@ -1,0 +1,83 @@
+different system multiuser steps:
+
+HOW TO RUN IN DIFFERENT SYSTEMS 
+---------------------- USER SYSTEM STEPS ----------------------------------
+~ first check the location of the python using
+python --version
+where.exe python
+
+~ on users laptop run this->  python -m venv .venv  to create the venv
+
+~ pip install -r requirements.txt 
+
+~ verify then -> python -c "import fastapi, uvicorn, psutil; print('Endpoint dependencies OK')"
+
+~ python -c "import secrets; print(secrets.token_urlsafe(32))"  generate new api key 
+
+~ paste it in the .env file's api_key section 
+
+~ run ipconfig and take ipv4 address
+
+~ python -m uvicorn app.main:app --host 0.0.0.0 --port 8501 <-run this into termnial
+
+~ verify heath in other terminal using->  curl.exe http://127.0.0.1:8501/health
+
+~ $env:ENDPOINT_API_KEY = (Get-Content .\.env | Select-String "^API_KEY=").ToString().Split("=",2)[1] run this into terminal 
+
+~ then verify using these cmds 
+Write-Host "API key loaded:" ([bool]$env:ENDPOINT_API_KEY)
+Write-Host "Length:" $env:ENDPOINT_API_KEY.Length
+
+~ then test authentication using
+curl.exe -H "X-API-KEY: $env:ENDPOINT_API_KEY" http://127.0.0.1:8501/disk/status
+
+---------------------------------NOW ONTO THE SERVER SIDE------------------------------------ 
+
+~ go to the main folder and activate script -> .\.venv\Scripts\Activate.ps1
+
+~ go to windows-automation-mcp-multi\config\endpoints.json
+
+~ change the ip address to the client's one
+eg:
+{
+  "endpoint_id": "endpoint-004",
+  "url": "http://192.168.1.8:8501",  -- this one
+  "api_key_env": "ENDPOINT_003_API_KEY"
+}
+
+~ check connection using 
+Test-NetConnection <SECOND_LAPTOP_IP> -Port 8501
+eg: Test-NetConnection 192.168.1.8 -Port 8501
+
+~ load the api key into server laptp using 
+$env:ENDPOINT_003_API_KEY = "PASTE_THE_API_KEY_FROM_THE_SECOND_LAPTOP_HERE" generated from user's
+
+~ verify the api key is loaded or not using 
+Write-Host "API key loaded:" ([bool]$env:ENDPOINT_003_API_KEY)
+Write-Host "Length:" $env:ENDPOINT_003_API_KEY.Length
+
+~ test using this command for connection check
+curl.exe -H "X-API-KEY: $env:ENDPOINT_003_API_KEY" http://192.168.1.8:8501/disk/status
+
+~ onto same terminal run 
+Write-Host "API key loaded:" ([bool]$env:ENDPOINT_003_API_KEY)
+it should return true
+
+~ then start mcp server 
+python server.py
+
+~ then in new terminal run 
+cd "C:\Users\10004805\Documents\windows-automation-mcp-multi"
+.\.venv\Scripts\Activate.ps1
+
+~ then test for disk status 
+fastmcp call http://localhost:8000/mcp get_disk_status user_id=test_user_04
+
+~ test for preview cleanup 
+fastmcp call http://localhost:8000/mcp preview_cleanup user_id=test_user_04
+
+~ test for actual cleanup 
+fastmcp call http://localhost:8000/mcp execute_cleanup user_id=test_user_04 confirm=true
+
+~ test for bookmark adding 
+fastmcp call http://localhost:8000/mcp add_browser_bookmarks user_id=test_user_04 browser=Edge close_browser=true

@@ -1,0 +1,94 @@
+multiuser steps
+from user side: 
+- endpoint folder into user's system 
+- create new api key and port in .env file 
+- .\.venv\Scripts\Activate.ps1 run into terminal 
+- python -m uvicorn app.main:app --host 0.0.0.0 --port 1431 <-[(number user chose or admin whatever)eg: 1431]
+- curl.exe http://127.0.0.1:1431/health run into new terminal to check
+- expected output -> {"status":"online","version":"2.0.0"}
+
+now server side:
+- open windows-automation-mcp-multi\config\endpoints.json
+- change the url to "url": "http://127.0.0.1:1431" (currently using at same system but if its another system then "url": "http://192.168.1.5:1431" put user's ip address into it)
+- no change in the api_key_env section
+- .\.venv\Scripts\Activate.ps1 activate mcp environment
+- set the user's api key into $env:ENDPOINT_003_API_KEY = "<THE-NEW-KEY-FROM-ENDPOINT-003>" and run in terminal 
+- verify key is loaded by this:
+if ($env:ENDPOINT_003_API_KEY) {
+    "ENDPOINT_003_API_KEY loaded"
+} else {
+    "missing"
+} 
+
+- go to new terminal and start mcp server->  python server.py
+- after starting server check connection through this test->
+
+from user's side->
+.\.venv\Scripts\Activate.ps1
+fastmcp call http://localhost:8000/mcp get_disk_status user_id=test_user_02
+
+form server's side->
+curl.exe -H "X-API-KEY: $env:ENDPOINT_003_API_KEY" http://127.0.0.1:1431/disk/status
+
+if it shows invalid api key then run:
+$env:ENDPOINT_003_API_KEY = (Get-Content "C:\Users\10004805\Documents\endpoint-api-003\.env" | Select-String "^API_KEY=").ToString().Split("=",2)[1]
+
+then run this cmd again
+curl.exe -H "X-API-KEY: $env:ENDPOINT_003_API_KEY" http://127.0.0.1:1431/disk/status
+
+
+---------------IMP POINT--------------
+if we assume key is loaded in terminal-1 and you run check command in terminal-2 then you will hit error with invalid key 
+--------------------------------------
+
+
+
+
+server testing commands
+- fastmcp call http://localhost:8000/mcp get_disk_status user_id=test_user_03
+- fastmcp call http://localhost:8000/mcp preview_cleanup user_id=test_user_03
+- fastmcp call http://localhost:8000/mcp execute_cleanup user_id=test_user_03 confirm=true
+- fastmcp call http://localhost:8000/mcp add_browser_bookmarks user_id=test_user_03 browser=Edge close_browser=true
+
+
+user testing commands
+- curl.exe http://127.0.0.1:1431/health
+- curl.exe -H "X-API-KEY: $env:ENDPOINT_API_KEY" http://127.0.0.1:1431/disk/status
+- bookmark test:
+$body = @{
+    browser = "Edge"
+    closeBrowser = $true
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "http://127.0.0.1:1431/browser/bookmarks" `
+    -Method POST `
+    -Headers @{ "X-API-KEY" = $env:ENDPOINT_API_KEY } `
+    -ContentType "application/json" `
+    -Body $body
+
+- cleanup preview test:
+$body = @{
+    cleanup_level = "safe"
+    dry_run = $true
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "http://127.0.0.1:1431/disk/cleanup" `
+    -Method POST `
+    -Headers @{ "X-API-KEY" = $env:ENDPOINT_API_KEY } `
+    -ContentType "application/json" `
+    -Body $body
+
+- cleanup execute
+$body = @{
+    cleanup_level = "safe"
+    dry_run = $false
+} | ConvertTo-Json
+
+Invoke-RestMethod `
+    -Uri "http://127.0.0.1:1431/disk/cleanup" `
+    -Method POST `
+    -Headers @{ "X-API-KEY" = $env:ENDPOINT_API_KEY } `
+    -ContentType "application/json" `
+    -Body $body
